@@ -12,55 +12,59 @@ var frameArrayIndex = 0;
 var frames = new Array();
 frames[0] = doc.activeLayer.name.split(/(\d+)/);
 
-var i = 0;
-
 readLayers(doc);
 
 function readLayers(doc) {
-	if(activeLayerType == "ArtLayer") {
-		for(i = 0; i < doc.layers.length; i++) {
-			// if(doc.layers[i].typename == "ArtLayer") {
+	// why global activeLayerType?
+    if(activeLayerType == "ArtLayer") {
+		for(var i = 0; i < doc.layers.length; i++) {
 
 				var partsOfName = doc.layers[i].name.split(/(\d+)/);
 				
 				if(partsOfName.length == frames[0].length) {
 
-					var flag = 0;
-					for(var j = 0; j < partsOfName.length; j++) {
-						if(partsOfName[j] != frames[0][j] && !isNaN(partsOfName[j])) {
-							flag += 1;
-							frameNumber = j;						
-						};
-					};
+                    var keyName = "";
+                    var keyNum = null;
 
-					if(flag == 1) {
-						doc.layers[i].visible = 0;
-						frames.push(partsOfName);
-					} else if (flag == 0) {
-						doc.layers[i].visible = 0;
-					};
-				};
-				
-			// };		
-		};	
+                    for(var j = 0; j < partsOfName.length; j++) {
+                        if(j != partsOfName.length-1) {
+                            if(partsOfName[j] == frames[0][j]) {
+                                keyName += partsOfName[j];
+                            }
+                        } else { 
+                            if(partsOfName[j] != frames[0][j]) {
+                                keyNum = partsOfName[j];
+                                frameNumber = j;
+                            }
+                        }
+                    }
+            
+                    if(keyName) {
+                        if(keyNum) {
+                            frames.push(partsOfName);
+                        }
+                    }
+                }
+        }
 	} else if (activeLayerType == "LayerSet") {
 		
-	};
-};
+	}
+}
 
 curFrame = frames[0][frameNumber];
-frames = frames.sort()
+frames = frames.sort();
 
-i = 0;
-while(curFrame > frames[i][frameNumber]) {
-	i++;
-	frameArrayIndex = i;
-};
-
-if(frameArrayIndex != 0) {
-	nextFrame = frameArrayIndex - 1;	
-} else {
-	nextFrame = frames.length-1;
-};
-
-doc.activeLayer = doc.artLayers.getByName(frames[nextFrame].join(""));
+if(frames.length > 1) {
+    for(var i=0; i < frames.length; i++) {
+        if(frames[i][frameNumber] == curFrame) {
+            frameArrayIndex = i;
+        }
+        doc.artLayers.getByName(frames[i].join("")).visible = 0;
+    }
+    if(frameArrayIndex != 0) {
+	    nextFrame = frameArrayIndex - 1;	
+    } else {
+	    nextFrame = frames.length-1;
+    }
+    doc.activeLayer = doc.artLayers.getByName(frames[nextFrame].join(""));
+}
