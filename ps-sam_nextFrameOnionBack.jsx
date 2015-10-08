@@ -1,5 +1,6 @@
 #target photoshop
 
+// TO DO: prevent execution when layer is hidden
 var doc = activeDocument;
 
 var activeLayerName = doc.activeLayer.name;
@@ -56,10 +57,13 @@ frames = frames.sort();
 
 if(frames.length > 1) {
     for(var i=0; i < frames.length; i++) {
+        // current layer 
         if(frames[i][frameNumber] == curFrame) {
+            doc.artLayers.getByName(frames[i].join("")).opacity = 50;
             frameArrayIndex = i;
+        } else {
+            doc.artLayers.getByName(frames[i].join("")).visible = 0;
         }
-        doc.artLayers.getByName(frames[i].join("")).visible = 0;
     }
     if(frameArrayIndex != 0) {
 	    nextFrame = frameArrayIndex - 1;	
@@ -67,4 +71,5 @@ if(frames.length > 1) {
 	    nextFrame = frames.length-1;
     }
     doc.activeLayer = doc.artLayers.getByName(frames[nextFrame].join(""));
+    doc.activeLayer.opacity = 100;
 }
